@@ -130,6 +130,9 @@
                         <pattern>org.slf4j</pattern>
                         <pattern>org.apache.commons.logging</pattern>
                     </avoidCallsTo>
+                    <excludedMethods>
+                        <method>toString</method>
+                    </excludedMethods>
                     <failWhenNoMutations>false</failWhenNoMutations>
                     <timestampedReports>false</timestampedReports>
                     <mutators>

@@ -8,7 +8,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -21,7 +20,7 @@ public class TrieBuilderTest {
     private MutableTrie<Object> trie;
 
     @Mock
-    private ImmutableTrie<Object> immutableTrie;
+    private Trie<Object> immutableTrie;
 
     @Mock
     private CharConverter emptyConverter;

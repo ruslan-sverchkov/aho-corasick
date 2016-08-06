@@ -72,7 +72,7 @@ public class TrieBuilder<T> {
      * @return initialized instance of a trie
      */
     @Nonnull
-    public ImmutableTrie<T> build() {
+    public Trie<T> build() {
         if (trie == null) {
             trie = createMutableTrie(createEmptyConverter());
         }
@@ -113,15 +113,16 @@ public class TrieBuilder<T> {
     }
 
     /**
-     * Create an instance of {@link ImmutableTrie}. Mostly for testing purposes.
+     * Create an instance of immutable trie. Ensures thread-safety through immutability. Could just use the interface
+     * instead but someone may decide to use instanceof for some reason. This is not a panacea but better than nothing.
      *
      * @param trie trie to wrap
-     * @return an instance of {@link ImmutableTrie}
+     * @return an instance of immutable trie
      * @throws NullPointerException if trie is null
      */
     @Nonnull
-    protected ImmutableTrie<T> createImmutableTrie(@Nonnull Trie<T> trie) {
-        return new ImmutableTrie<>(trie);
+    protected Trie<T> createImmutableTrie(@Nonnull Trie<T> trie) {
+        return trie::match;
     }
 
     /*
