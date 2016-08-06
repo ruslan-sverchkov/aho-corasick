@@ -9,9 +9,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
-public class TrieTest {
+/**
+ * Integration tests for Aho-Coraskick.
+ *
+ * @author Ruslan Sverchkov
+ */
+public class TrieIntegrationTest {
 
     @Test
     public void test() {

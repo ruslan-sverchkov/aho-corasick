@@ -10,6 +10,11 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Tests for {@link TrieBuilder} class.
+ *
+ * @author Ruslan Sverchkov
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class TrieBuilderTest {
 
