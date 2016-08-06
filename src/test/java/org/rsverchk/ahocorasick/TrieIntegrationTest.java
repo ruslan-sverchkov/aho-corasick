@@ -11,7 +11,7 @@ import java.util.Set;
 import static org.junit.Assert.*;
 
 /**
- * Integration tests for Aho-Coraskick.
+ * Integration tests for Aho-Corasick.
  *
  * @author Ruslan Sverchkov
  */
