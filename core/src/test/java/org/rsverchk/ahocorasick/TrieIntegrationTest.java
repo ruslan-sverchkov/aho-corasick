@@ -168,6 +168,7 @@ public class TrieIntegrationTest {
 
         String text = StringUtils.join(lines, " ");
 
+        // todo test uses code that itself needs to be tested - very bad, do something with it when inspiration comes in
         Set<Triple<Integer, Integer, String>> expectedMatches = new HashSet<>();
         for (String s : lines) {
             int index = text.indexOf(s);
