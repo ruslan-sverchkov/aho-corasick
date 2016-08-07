@@ -10,7 +10,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
 /**

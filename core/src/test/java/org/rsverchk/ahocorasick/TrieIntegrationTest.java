@@ -1,13 +1,22 @@
 package org.rsverchk.ahocorasick;
 
 import com.google.common.collect.ImmutableSet;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
+import org.hamcrest.collection.IsIterableContainingInAnyOrder;
 import org.junit.Test;
 
+import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -145,6 +154,25 @@ public class TrieIntegrationTest {
                 new ImmutableTriple<>(1, 3, "he"),
                 new ImmutableTriple<>(1, 5, "hers")),
                 set);
+    }
+
+    @Test
+    public void testBigTrie() throws IOException, URISyntaxException {
+        URL url = Thread.currentThread().getContextClassLoader().getResource("google-10000-english.txt");
+        List<String> lines = Files.readAllLines(Paths.get(url.toURI()));
+        TrieBuilder<String> builder = new TrieBuilder<>();
+        for (String s : lines) {
+            builder.addCharSequence(s, s);
+        }
+        Trie<String> trie = builder.build();
+        String text = StringUtils.join(lines, " ");
+        Set<String> matches = new HashSet<>();
+        trie.match(text, (int beginIndex, int endIndex, String payload) -> {
+            matches.add(text.substring(beginIndex, endIndex));
+            return true;
+        });
+
+        assertThat(matches, equalTo(new HashSet<>(lines)));
     }
 
 }
