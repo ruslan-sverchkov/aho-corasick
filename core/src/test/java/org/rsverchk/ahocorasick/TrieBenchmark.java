@@ -55,7 +55,7 @@ public class TrieBenchmark {
     @Measurement(iterations = 5)
     @Warmup(iterations = 5)
     @BenchmarkMode(Mode.AverageTime)
-    @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void testTextOf10Symbols(MyState state, Blackhole blackhole) {
         AtomicLong counter = new AtomicLong();
         state.trie.match(state.textOf10Symbols, (int beginIndex, int endIndex, String payload) -> {
@@ -115,7 +115,7 @@ public class TrieBenchmark {
     @Measurement(iterations = 5)
     @Warmup(iterations = 5)
     @BenchmarkMode(Mode.AverageTime)
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void testTextOf50000Symbols(MyState state, Blackhole blackhole) {
         AtomicLong counter = new AtomicLong();
         state.trie.match(state.textOf50000Symbols, (int beginIndex, int endIndex, String payload) -> {
