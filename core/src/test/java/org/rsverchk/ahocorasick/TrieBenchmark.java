@@ -50,6 +50,10 @@ public class TrieBenchmark {
 
     }
 
+    public static void main(String ... args) throws IOException, RunnerException {
+        Main.main(args);
+    }
+
     @Benchmark
     @Fork(value = 1, warmups = 0)
     @Measurement(iterations = 10)
@@ -57,12 +61,7 @@ public class TrieBenchmark {
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void testTextOf10Symbols(MyState state, Blackhole blackhole) {
-        AtomicLong counter = new AtomicLong();
-        state.trie.match(state.textOf10Symbols, (int beginIndex, int endIndex, String payload) -> {
-            counter.incrementAndGet();
-            return true;
-        });
-        blackhole.consume(counter);
+        test(state.trie, state.textOf10Symbols, blackhole);
     }
 
     @Benchmark
@@ -72,12 +71,7 @@ public class TrieBenchmark {
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void testTextOf100Symbols(MyState state, Blackhole blackhole) {
-        AtomicLong counter = new AtomicLong();
-        state.trie.match(state.textOf100Symbols, (int beginIndex, int endIndex, String payload) -> {
-            counter.incrementAndGet();
-            return true;
-        });
-        blackhole.consume(counter);
+        test(state.trie, state.textOf100Symbols, blackhole);
     }
 
     @Benchmark
@@ -87,12 +81,7 @@ public class TrieBenchmark {
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void testTextOf1000Symbols(MyState state, Blackhole blackhole) {
-        AtomicLong counter = new AtomicLong();
-        state.trie.match(state.textOf1000Symbols, (int beginIndex, int endIndex, String payload) -> {
-            counter.incrementAndGet();
-            return true;
-        });
-        blackhole.consume(counter);
+        test(state.trie, state.textOf1000Symbols, blackhole);
     }
 
     @Benchmark
@@ -102,12 +91,7 @@ public class TrieBenchmark {
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void testTextOf10000Symbols(MyState state, Blackhole blackhole) {
-        AtomicLong counter = new AtomicLong();
-        state.trie.match(state.textOf10000Symbols, (int beginIndex, int endIndex, String payload) -> {
-            counter.incrementAndGet();
-            return true;
-        });
-        blackhole.consume(counter);
+        test(state.trie, state.textOf10000Symbols, blackhole);
     }
 
     @Benchmark
@@ -117,16 +101,16 @@ public class TrieBenchmark {
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void testTextOf50000Symbols(MyState state, Blackhole blackhole) {
+        test(state.trie, state.textOf50000Symbols, blackhole);
+    }
+
+    private void test(Trie<String> trie, String text, Blackhole blackhole) {
         AtomicLong counter = new AtomicLong();
-        state.trie.match(state.textOf50000Symbols, (int beginIndex, int endIndex, String payload) -> {
+        trie.match(text, (int beginIndex, int endIndex, String payload) -> {
             counter.incrementAndGet();
             return true;
         });
         blackhole.consume(counter);
-    }
-
-    public static void main(String ... args) throws IOException, RunnerException {
-        Main.main(args);
     }
 
 }
