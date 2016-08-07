@@ -165,14 +165,25 @@ public class TrieIntegrationTest {
             builder.addCharSequence(s, s);
         }
         Trie<String> trie = builder.build();
+
         String text = StringUtils.join(lines, " ");
-        Set<String> matches = new HashSet<>();
+
+        Set<Triple<Integer, Integer, String>> expectedMatches = new HashSet<>();
+        for (String s : lines) {
+            int index = text.indexOf(s);
+            while (index != -1) {
+                expectedMatches.add(Triple.of(index, index + s.length(), s));
+                index = text.indexOf(s, index + 1);
+            }
+        }
+
+        Set<Triple<Integer, Integer, String>> matches = new HashSet<>();
         trie.match(text, (int beginIndex, int endIndex, String payload) -> {
-            matches.add(text.substring(beginIndex, endIndex));
+            matches.add(Triple.of(beginIndex, endIndex, payload));
             return true;
         });
 
-        assertThat(matches, equalTo(new HashSet<>(lines)));
+        assertThat(matches, equalTo(expectedMatches));
     }
 
 }
