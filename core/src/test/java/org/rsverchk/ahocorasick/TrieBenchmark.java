@@ -9,7 +9,12 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class Test {
+/**
+ * Benchmarks for Aho-Corasick.
+ *
+ * @author Ruslan Sverchkov
+ */
+public class TrieBenchmark {
 
     @State(Scope.Benchmark)
     public static class MyState {
@@ -17,7 +22,7 @@ public class Test {
         public Trie<String> trie;
 
         @Setup(Level.Trial)
-        public void doSetup() {
+        public void setup() {
             TrieBuilder<String> builder = new TrieBuilder<>();
             trie = builder.addCharSequence("hers", "hers")
                     .addCharSequence("his", "his")
