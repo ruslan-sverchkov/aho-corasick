@@ -52,8 +52,8 @@ public class TrieBenchmark {
 
     @Benchmark
     @Fork(value = 1, warmups = 0)
-    @Measurement(iterations = 5)
-    @Warmup(iterations = 5)
+    @Measurement(iterations = 10)
+    @Warmup(iterations = 10)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void testTextOf10Symbols(MyState state, Blackhole blackhole) {
@@ -67,8 +67,8 @@ public class TrieBenchmark {
 
     @Benchmark
     @Fork(value = 1, warmups = 0)
-    @Measurement(iterations = 5)
-    @Warmup(iterations = 5)
+    @Measurement(iterations = 10)
+    @Warmup(iterations = 10)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void testTextOf100Symbols(MyState state, Blackhole blackhole) {
@@ -82,8 +82,8 @@ public class TrieBenchmark {
 
     @Benchmark
     @Fork(value = 1, warmups = 0)
-    @Measurement(iterations = 5)
-    @Warmup(iterations = 5)
+    @Measurement(iterations = 10)
+    @Warmup(iterations = 10)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void testTextOf1000Symbols(MyState state, Blackhole blackhole) {
@@ -97,8 +97,8 @@ public class TrieBenchmark {
 
     @Benchmark
     @Fork(value = 1, warmups = 0)
-    @Measurement(iterations = 5)
-    @Warmup(iterations = 5)
+    @Measurement(iterations = 10)
+    @Warmup(iterations = 10)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void testTextOf10000Symbols(MyState state, Blackhole blackhole) {
@@ -112,8 +112,8 @@ public class TrieBenchmark {
 
     @Benchmark
     @Fork(value = 1, warmups = 0)
-    @Measurement(iterations = 5)
-    @Warmup(iterations = 5)
+    @Measurement(iterations = 10)
+    @Warmup(iterations = 10)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void testTextOf50000Symbols(MyState state, Blackhole blackhole) {
