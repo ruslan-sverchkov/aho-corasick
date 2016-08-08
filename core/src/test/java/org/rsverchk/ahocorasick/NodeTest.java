@@ -59,64 +59,6 @@ public class NodeTest {
         assertThat(a.isTerminal(), is(true));
     }
 
-    // test getParent() ------------------------------------------------------------------------------------------------
-    @Test(expected = IllegalStateException.class)
-    public void testGetParent_NodeIsRoot() {
-        root.getParent();
-    }
-
-    @Test
-    public void testGetParent() {
-        Node<Object> a = root.createChild('a');
-
-        assertThat(a.getParent(), sameInstance(root));
-    }
-    // test getParent() ------------------------------------------------------------------------------------------------
-
-    // test setSuffix() ------------------------------------------------------------------------------------------------
-    @Test(expected = NullPointerException.class)
-    public void testSetSuffix_SuffixIsNull() {
-        Node<Object> a = root.createChild('a');
-
-        a.setSuffix(null);
-    }
-
-    @Test
-    public void testSetSuffix() {
-        Node<Object> a = root.createChild('a');
-
-        a.setSuffix(node);
-
-        assertThat(a.getSuffix(), sameInstance(node));
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void testGetSuffix_SuffixIsNull() {
-        Node<Object> a = root.createChild('a');
-
-        a.getSuffix();
-    }
-    // test setSuffix() ------------------------------------------------------------------------------------------------
-
-    // test setTerminalSuffix() ----------------------------------------------------------------------------------------
-    @Test(expected = NullPointerException.class)
-    public void testSetTerminalSuffix_TerminalSuffixIsNull() {
-        Node<Object> a = root.createChild('a');
-
-        a.setTerminalSuffix(null);
-    }
-
-    @Test
-    public void testSetTerminalSuffix() {
-        Node<Object> a = root.createChild('a');
-
-        a.setTerminalSuffix(node);
-
-        assertThat(a.getTerminalSuffix(), sameInstance(node));
-    }
-    // test setTerminalSuffix() ----------------------------------------------------------------------------------------
-
-
     // test setPayload() -----------------------------------------------------------------------------------------------
     @Test(expected = NullPointerException.class)
     public void testSetPayload_PayloadIsNull() {
@@ -134,16 +76,6 @@ public class NodeTest {
         assertThat(a.getPayload(), sameInstance(payload));
     }
     // test setPayload() -----------------------------------------------------------------------------------------------
-
-    @Test
-    public void testCompact() {
-        root.setChildren(children);
-
-        root.compact();
-
-        verify(children, times(1)).compact();
-        verifyNoMoreInteractions(children);
-    }
 
     // test createChild() ----------------------------------------------------------------------------------------------
     @Test(expected = IllegalArgumentException.class)
@@ -202,6 +134,108 @@ public class NodeTest {
     }
     // test forEachChild() ---------------------------------------------------------------------------------------------
 
+    @Test
+    public void testFindTerminal() {
+        Node<Object> root = Node.root();
+        root.setSuffix(root);
+
+        assertThat(root.findTerminalSuffix(), nullValue());
+
+        // level 1 -----------------------------------------
+        Node<Object> a = root.createChild('a');
+        Node<Object> b = root.createChild('b');
+        Node<Object> c = root.createChild('c');
+
+        a.setSuffix(root);
+        b.setSuffix(root);
+        c.setSuffix(root);
+
+        b.setPayload(new Object());
+
+        assertThat(a.findTerminalSuffix(), nullValue());
+        assertThat(b.findTerminalSuffix(), nullValue());
+        assertThat(c.findTerminalSuffix(), nullValue());
+        // level 1 -----------------------------------------
+
+        // level 2 -----------------------------------------
+        Node<Object> ab = a.createChild('b');
+        Node<Object> cd = c.createChild('d');
+
+        ab.setSuffix(b);
+        cd.setSuffix(root);
+
+        assertThat(ab.findTerminalSuffix(), sameInstance(b));
+        assertThat(cd.findTerminalSuffix(), nullValue());
+        // level 2 -----------------------------------------
+    }
+
+    @Test
+    public void testFindSuffix() {
+        Node<Object> root = Node.root();
+        root.setSuffix(root);
+
+        // level 1 -----------------------------------------
+        Node<Object> a = root.createChild('a');
+        Node<Object> b = root.createChild('b');
+        Node<Object> c = root.createChild('c');
+
+        assertThat(a.findSuffix(), sameInstance(root));
+        assertThat(b.findSuffix(), sameInstance(root));
+        assertThat(c.findSuffix(), sameInstance(root));
+
+        a.setSuffix(root);
+        b.setSuffix(root);
+        c.setSuffix(root);
+        // level 1 -----------------------------------------
+
+        // level 2 -----------------------------------------
+        Node<Object> ab = a.createChild('b');
+        Node<Object> cd = c.createChild('d');
+
+        assertThat(ab.findSuffix(), sameInstance(b));
+        assertThat(cd.findSuffix(), sameInstance(root));
+
+        ab.setSuffix(b);
+        cd.setSuffix(root);
+        // level 2 -----------------------------------------
+
+        // level 3 -----------------------------------------
+        Node<Object> abc = ab.createChild('c');
+        Node<Object> cde = cd.createChild('e');
+
+        assertThat(abc.findSuffix(), sameInstance(c));
+        assertThat(cde.findSuffix(), sameInstance(root));
+        // level 3 -----------------------------------------
+    }
+
+    // test initNode() -------------------------------------------------------------------------------------------------
+//    @Test
+//    public void testInitNode_NoTerminalSuffix() {
+//        doReturn(suffix).when(trie).findSuffix('$', node);
+//        doReturn(null).when(trie).findTerminalSuffix(node);
+//
+//        trie.initNode('$', node);
+//
+//        verify(node, times(1)).setSuffix(suffix);
+//        verify(node, times(1)).compact();
+//        verifyNoMoreInteractions(node);
+//    }
+//
+//    @Test
+//    public void testInitNode() {
+//        doReturn(suffix).when(trie).findSuffix('$', node);
+//        doReturn(terminalSuffix).when(trie).findTerminalSuffix(node);
+//
+//        trie.initNode('$', node);
+//
+//        InOrder inOrder = inOrder(node);
+//        inOrder.verify(node, times(1)).setSuffix(suffix);
+//        inOrder.verify(node, times(1)).setTerminalSuffix(terminalSuffix);
+//        inOrder.verify(node, times(1)).compact();
+//        verifyNoMoreInteractions(node);
+//    }
+    // test initNode() -------------------------------------------------------------------------------------------------
+
     // test getKey() ---------------------------------------------------------------------------------------------------
     @Test(expected = IllegalStateException.class)
     public void testGetKey_RootNode() {
@@ -247,22 +281,6 @@ public class NodeTest {
 
         assertThat(abc.toString(), notNullValue()); // make sure there are no exceptions or infinite loops
     }
-
-    // test setChildren() ----------------------------------------------------------------------------------------------
-    @Test(expected = NullPointerException.class)
-    public void testSetChildren_ChildrenIsNull() {
-        root.setChildren(null);
-    }
-
-    @Test
-    public void testSetChildren() {
-        assertThat(root.getChildren(), nullValue());
-
-        root.setChildren(children);
-
-        assertThat(root.getChildren(), sameInstance(children));
-    }
-    // test setChildren() ----------------------------------------------------------------------------------------------
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructor_ParentIsNull_LevelIsNegative() {

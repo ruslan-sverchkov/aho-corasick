@@ -9,7 +9,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
 /**
@@ -148,16 +147,16 @@ public class MutableTrieTest {
 
     @Test
     public void testInit() {
+        doReturn(consumer).when(trie).getNodeInitializer();
+        doNothing().when(trie).breadthFirstTraversal(consumer);
+        trie.setRoot(node);
+
         trie.init();
 
-        assertThat(root.getSuffix(), sameInstance(root));
-        InOrder inOrder = inOrder(trie);
-        inOrder.verify(trie, times(1)).initNode('a', a);
-        inOrder.verify(trie, times(1)).initNode('c', c); // remember there is hashing
-        inOrder.verify(trie, times(1)).initNode('b', b);
-        inOrder.verify(trie, times(1)).initNode('b', ab);
-        inOrder.verify(trie, times(1)).initNode('c', abc);
         assertThat(trie.isBuilt(), is(true));
+        verify(node, times(1)).init();
+        verify(trie, times(1)).breadthFirstTraversal(consumer);
+        verifyNoMoreInteractions(node);
     }
     // test init() -----------------------------------------------------------------------------------------------------
 
@@ -233,108 +232,6 @@ public class MutableTrieTest {
     }
     // test match() ----------------------------------------------------------------------------------------------------
 
-    @Test
-    public void testFindTerminal() {
-        Node<Object> root = Node.root();
-        root.setSuffix(root);
-
-        assertThat(trie.findTerminalSuffix(root), nullValue());
-
-        // level 1 -----------------------------------------
-        Node<Object> a = root.createChild('a');
-        Node<Object> b = root.createChild('b');
-        Node<Object> c = root.createChild('c');
-
-        a.setSuffix(root);
-        b.setSuffix(root);
-        c.setSuffix(root);
-
-        b.setPayload(new Object());
-
-        assertThat(trie.findTerminalSuffix(a), nullValue());
-        assertThat(trie.findTerminalSuffix(b), nullValue());
-        assertThat(trie.findTerminalSuffix(c), nullValue());
-        // level 1 -----------------------------------------
-
-        // level 2 -----------------------------------------
-        Node<Object> ab = a.createChild('b');
-        Node<Object> cd = c.createChild('d');
-
-        ab.setSuffix(b);
-        cd.setSuffix(root);
-
-        assertThat(trie.findTerminalSuffix(ab), sameInstance(b));
-        assertThat(trie.findTerminalSuffix(cd), nullValue());
-        // level 2 -----------------------------------------
-    }
-
-    @Test
-    public void testFindSuffix() {
-        Node<Object> root = Node.root();
-        root.setSuffix(root);
-
-        // level 1 -----------------------------------------
-        Node<Object> a = root.createChild('a');
-        Node<Object> b = root.createChild('b');
-        Node<Object> c = root.createChild('c');
-
-        assertThat(trie.findSuffix('a', a), sameInstance(root));
-        assertThat(trie.findSuffix('b', b), sameInstance(root));
-        assertThat(trie.findSuffix('c', c), sameInstance(root));
-
-        a.setSuffix(root);
-        b.setSuffix(root);
-        c.setSuffix(root);
-        // level 1 -----------------------------------------
-
-        // level 2 -----------------------------------------
-        Node<Object> ab = a.createChild('b');
-        Node<Object> cd = c.createChild('d');
-
-        assertThat(trie.findSuffix('b', ab), sameInstance(b));
-        assertThat(trie.findSuffix('d', cd), sameInstance(root));
-
-        ab.setSuffix(b);
-        cd.setSuffix(root);
-        // level 2 -----------------------------------------
-
-        // level 3 -----------------------------------------
-        Node<Object> abc = ab.createChild('c');
-        Node<Object> cde = cd.createChild('e');
-
-        assertThat(trie.findSuffix('c', abc), sameInstance(c));
-        assertThat(trie.findSuffix('e', cde), sameInstance(root));
-        // level 3 -----------------------------------------
-    }
-
-    // test initNode() -------------------------------------------------------------------------------------------------
-    @Test
-    public void testInitNode_NoTerminalSuffix() {
-        doReturn(suffix).when(trie).findSuffix('$', node);
-        doReturn(null).when(trie).findTerminalSuffix(node);
-
-        trie.initNode('$', node);
-
-        verify(node, times(1)).setSuffix(suffix);
-        verify(node, times(1)).compact();
-        verifyNoMoreInteractions(node);
-    }
-
-    @Test
-    public void testInitNode() {
-        doReturn(suffix).when(trie).findSuffix('$', node);
-        doReturn(terminalSuffix).when(trie).findTerminalSuffix(node);
-
-        trie.initNode('$', node);
-
-        InOrder inOrder = inOrder(node);
-        inOrder.verify(node, times(1)).setSuffix(suffix);
-        inOrder.verify(node, times(1)).setTerminalSuffix(terminalSuffix);
-        inOrder.verify(node, times(1)).compact();
-        verifyNoMoreInteractions(node);
-    }
-    // test initNode() -------------------------------------------------------------------------------------------------
-
     // test breadthFirstTraversal() ------------------------------------------------------------------------------------
     @Test(expected = NullPointerException.class)
     public void testBreadthFirstTraversal_ConsumerIsNull() {
@@ -391,6 +288,16 @@ public class MutableTrieTest {
         verifyNoMoreInteractions(handler);
     }
     // test handleMatch() ----------------------------------------------------------------------------------------------
+
+    @Test
+    public void testGetNodeInitializer() {
+        NodeConsumer<Object> nodeInitializer = trie.getNodeInitializer();
+
+        nodeInitializer.consume('$', node);
+
+        verify(node, times(1)).init();
+        verifyNoMoreInteractions(node);
+    }
 
     @Test(expected = NullPointerException.class)
     public void testConstructor_ConverterIsNull() {

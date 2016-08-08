@@ -79,8 +79,8 @@ public class MutableTrie<T> implements Trie<T> {
         if (built) {
             throw new IllegalStateException("cannot modify an initialized trie");
         }
-        root.setSuffix(root);
-        breadthFirstTraversal(this::initNode);
+        root.init();
+        breadthFirstTraversal(getNodeInitializer());
         built = true;
     }
 
@@ -120,77 +120,6 @@ public class MutableTrie<T> implements Trie<T> {
                 }
             }
         }
-    }
-
-    /**
-     * Find suffix node for the specified node. Pay attention that by the time we look for suffix of the node on level
-     * N, all suffixes of all nodes on levels from 1 to N-1 must be set. This can be ensured by breadth-first traversal
-     * of the trie.
-     *
-     * @param key  a key corresponding to node
-     * @param node the node to find suffix for
-     * @return suffix node for the specified node
-     * @throws NullPointerException  if node is null
-     * @throws IllegalStateException if the method is called before all suffixes of all nodes on higher levels are set
-     */
-    @Nonnull
-    protected Node<T> findSuffix(char key, @Nonnull Node<T> node) {
-        Validate.notNull(node);
-        Node<T> parent = node.getParent();
-        if (parent.isRoot()) {
-            return parent; // for direct descendants of the root it is the suffix
-        }
-        Node<T> parentSuffix = parent.getSuffix(); // get parent suffix
-        Node<T> suffixChild = parentSuffix.getChild(key); // get suffix child corresponding to the key
-        while (suffixChild == null) { // if no such child
-            if (parentSuffix.isRoot()) { // and we're in the root
-                return parentSuffix; // return root
-            }
-            parentSuffix = parentSuffix.getSuffix(); // if we're not in the root, get current node's suffix
-            suffixChild = parentSuffix.getChild(key); // get suffix child corresponding to the key
-        }
-        return suffixChild; // a suitable node is found, return it
-    }
-
-    /**
-     * Find the nearest terminal suffix for the specified node. Pay attention that by the time we look for a terminal
-     * suffix, all suffixes of all nodes on levels from 1 to N-1 must be set must be set. This can be ensured by
-     * breadth-first traversal of the trie.
-     *
-     * @return the nearest terminal suffix for the specified node, null if there are no candidates
-     * @throws NullPointerException if node is null
-     */
-    @Nullable
-    protected Node<T> findTerminalSuffix(@Nonnull Node<T> node) {
-        Validate.notNull(node);
-        Node<T> currentSuffix = node.getSuffix();
-        while (true) {
-            if (currentSuffix.isRoot()) {
-                return null;
-            }
-            if (currentSuffix.isTerminal()) {
-                return currentSuffix;
-            }
-            Node<T> current = currentSuffix;
-            currentSuffix = current.getSuffix();
-        }
-    }
-
-    /**
-     * Set suffix, terminal suffix and compact the node.
-     *
-     * @param c    character corresponding to the node
-     * @param node th node to init
-     */
-    protected void initNode(char c, @Nonnull Node<T> node) {
-        Validate.notNull(node);
-        Node<T> suffix = findSuffix(c, node);
-        node.setSuffix(suffix);
-        Node<T> terminalSuffix = findTerminalSuffix(node);
-        if (terminalSuffix != null) {
-            node.setTerminalSuffix(terminalSuffix);
-        }
-        node.compact();
     }
 
     /**
@@ -240,6 +169,16 @@ public class MutableTrie<T> implements Trie<T> {
             current = current.getTerminalSuffix();
         }
         return true;
+    }
+
+    /**
+     * Get a node initialization function. Mostly for testing purposes.
+     *
+     * @return a node initialization function
+     */
+    @Nonnull
+    protected NodeConsumer<T> getNodeInitializer() {
+        return (c, node) -> node.init();
     }
 
     /*

@@ -56,20 +56,6 @@ public class Node<T> {
     }
 
     /**
-     * Get parent node.
-     *
-     * @return parent node
-     * @throws IllegalStateException if current node is root, the operation makes no sense for root
-     */
-    @Nonnull
-    public Node<T> getParent() {
-        if (isRoot()) {
-            throw new IllegalStateException("makes no sense for root");
-        }
-        return parent;
-    }
-
-    /**
      * Get node level (length of the shortest path between the node and root).
      *
      * @return node level
@@ -94,17 +80,6 @@ public class Node<T> {
     }
 
     /**
-     * Set suffix.
-     *
-     * @param suffix suffix to set
-     * @throws NullPointerException if suffix is null
-     */
-    public void setSuffix(@Nonnull Node<T> suffix) {
-        Validate.notNull(suffix);
-        this.suffix = suffix;
-    }
-
-    /**
      * Get terminal suffix.
      *
      * @return terminal suffix, can be null
@@ -112,17 +87,6 @@ public class Node<T> {
     @Nullable
     public Node<T> getTerminalSuffix() {
         return terminalSuffix;
-    }
-
-    /**
-     * Set terminal suffix.
-     *
-     * @param terminalSuffix terminal suffix
-     * @throws NullPointerException if terminalSuffix is null
-     */
-    public void setTerminalSuffix(@Nonnull Node<T> terminalSuffix) {
-        Validate.notNull(terminalSuffix);
-        this.terminalSuffix = terminalSuffix;
     }
 
     /**
@@ -147,9 +111,15 @@ public class Node<T> {
     }
 
     /**
-     * Compact children map.
+     * Set suffix, terminal suffix and compact the node.
      */
-    public void compact() {
+    public void init() {
+        Node<T> suffix = findSuffix();
+        setSuffix(suffix);
+        Node<T> terminalSuffix = findTerminalSuffix();
+        if (terminalSuffix != null) {
+            this.terminalSuffix = terminalSuffix;
+        }
         if (children != null) {
             children.compact();
         }
@@ -226,6 +196,59 @@ public class Node<T> {
     }
 
     /**
+     * Find suffix node for current node. Pay attention that by the time we look for suffix of the node on level
+     * N, all suffixes of all nodes on levels from 1 to N-1 must be set. This can be ensured by breadth-first traversal
+     * of the trie.
+     *
+     * @return suffix node for the specified node
+     * @throws NullPointerException  if node is null
+     * @throws IllegalStateException if the method is called before all suffixes of all nodes on higher levels are set
+     */
+    @Nonnull
+    protected Node<T> findSuffix() {
+        if (isRoot()) {
+            return this;
+        }
+        if (parent.isRoot()) {
+            return parent; // for direct descendants of the root it is the suffix
+        }
+        char key = getKey();
+        Node<T> parentSuffix = parent.getSuffix(); // get parent suffix
+        Node<T> suffixChild = parentSuffix.getChild(key); // get suffix child corresponding to the key
+        while (suffixChild == null) { // if no such child
+            if (parentSuffix.isRoot()) { // and we're in the root
+                return parentSuffix; // return root
+            }
+            parentSuffix = parentSuffix.getSuffix(); // if we're not in the root, get current node's suffix
+            suffixChild = parentSuffix.getChild(key); // get suffix child corresponding to the key
+        }
+        return suffixChild; // a suitable node is found, return it
+    }
+
+    /**
+     * Find the nearest terminal suffix for current node. Pay attention that by the time we look for a terminal
+     * suffix, all suffixes of all nodes on levels from 1 to N-1 must be set must be set. This can be ensured by
+     * breadth-first traversal of the trie.
+     *
+     * @return the nearest terminal suffix for the specified node, null if there are no candidates
+     * @throws IllegalStateException if the method is called before all suffixes of all nodes on higher levels are set
+     */
+    @Nullable
+    protected Node<T> findTerminalSuffix() {
+        Node<T> currentSuffix = getSuffix();
+        while (true) {
+            if (currentSuffix.isRoot()) {
+                return null;
+            }
+            if (currentSuffix.isTerminal()) {
+                return currentSuffix;
+            }
+            Node<T> current = currentSuffix;
+            currentSuffix = current.getSuffix();
+        }
+    }
+
+    /**
      * Get a key corresponding to current node. Useful for logging.
      *
      * @return a key corresponding to current node
@@ -263,25 +286,32 @@ public class Node<T> {
         return ref.get();
     }
 
-    /**
-     * Get children. For testing purposes.
-     *
-     * @return children
+    /*
+    Implementation comment:
+    The methods are useful for testing purposes. Even though the class is very simple, it's still a full-fledged state
+    machine and for white box testing of a state machine we need an ability to set its state.
      */
+
+    @Nullable
+    public Node<T> getParent() {
+        return parent;
+    }
+
     @Nullable
     protected TCharObjectHashMap<Node<T>> getChildren() {
         return children;
     }
 
-    /**
-     * Set children. For testing purposes.
-     *
-     * @param children children to set
-     * @throws NullPointerException if children is null
-     */
-    public void setChildren(@Nonnull TCharObjectHashMap<Node<T>> children) {
-        Validate.notNull(children);
+    public void setChildren(@Nullable TCharObjectHashMap<Node<T>> children) {
         this.children = children;
+    }
+
+    protected void setSuffix(@Nullable Node<T> suffix) {
+        this.suffix = suffix;
+    }
+
+    protected void setTerminalSuffix(@Nullable Node<T> terminalSuffix) {
+        this.terminalSuffix = terminalSuffix;
     }
 
     /**
