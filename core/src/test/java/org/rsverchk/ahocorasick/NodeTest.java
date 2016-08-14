@@ -21,6 +21,9 @@ import static org.mockito.Mockito.*;
 public class NodeTest {
 
     @Mock
+    private MatchHandler<Object> handler;
+
+    @Mock
     private TCharObjectProcedure<Node<Object>> procedure;
 
     @Mock
@@ -133,6 +136,75 @@ public class NodeTest {
         verifyNoMoreInteractions(procedure);
     }
     // test forEachChild() ---------------------------------------------------------------------------------------------
+
+    // test handleMatch() ----------------------------------------------------------------------------------------------
+    @Test(expected = IllegalArgumentException.class)
+    public void testHandleMatch_IndexIsLesserThanNodeLevel() {
+        Node<Object> a = root.createChild('a');
+        Node<Object> ab = a.createChild('b');
+
+        ab.handleMatch(0, handler);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testHandleMatch_HandlerIsNull() {
+        Node<Object> a = root.createChild('a');
+
+        a.handleMatch(1, null);
+    }
+
+    @Test
+    public void testHandleMatch_Interrupt() {
+        Node<Object> a = root.createChild('a');
+        Node<Object> ab = a.createChild('b');
+        Node<Object> abc = ab.createChild('c');
+        Node<Object> c = root.createChild('c');
+
+        root.setSuffix(root);
+        a.setSuffix(root);
+        c.setSuffix(root);
+        c.setPayload("c");
+        ab.setSuffix(root);
+        abc.setSuffix(c);
+        abc.setTerminalSuffix(c);
+        abc.setPayload("abc");
+
+        doReturn(false).when(handler).handle(0, 3, "abc");
+        doReturn(true).when(handler).handle(2, 3, "c");
+
+        abc.handleMatch(2, handler);
+
+        verify(handler, times(1)).handle(0, 3, "abc");
+        verify(handler, never()).handle(2, 3, "c");
+        verifyNoMoreInteractions(handler);
+    }
+
+    @Test
+    public void testHandleMatch() {
+        Node<Object> a = root.createChild('a');
+        Node<Object> ab = a.createChild('b');
+        Node<Object> abc = ab.createChild('c');
+        Node<Object> c = root.createChild('c');
+
+        root.setSuffix(root);
+        a.setSuffix(root);
+        c.setSuffix(root);
+        c.setPayload("c");
+        ab.setSuffix(root);
+        abc.setSuffix(c);
+        abc.setTerminalSuffix(c);
+        abc.setPayload("abc");
+
+        doReturn(true).when(handler).handle(0, 3, "abc");
+        doReturn(true).when(handler).handle(2, 3, "c");
+
+        abc.handleMatch(2, handler);
+
+        verify(handler, times(1)).handle(0, 3, "abc");
+        verify(handler, times(1)).handle(2, 3, "c");
+        verifyNoMoreInteractions(handler);
+    }
+    // test handleMatch() ----------------------------------------------------------------------------------------------
 
     @Test
     public void testFindTerminal() {

@@ -3,7 +3,6 @@ package org.rsverchk.ahocorasick;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -107,7 +106,7 @@ public class MutableTrie<T> implements Trie<T> {
             char converted = converter.convert(character);
             Node<T> node = current.getChild(converted);
             if (node != null) {
-                if (!handleMatch(node, index, handler)) {
+                if (!node.handleMatch(index, handler)) {
                     return;
                 }
                 current = node;
@@ -140,35 +139,6 @@ public class MutableTrie<T> implements Trie<T> {
                 return true;
             });
         }
-    }
-
-    /**
-     * A position corresponding to the current node has been found in an input string, traverse the trie starting from
-     * the current node and call the specified handler for each terminal node that will be encountered.
-     *
-     * @param index   a position in an input string corresponding to the current node
-     * @param handler a match handler
-     * @return whether to continue matching or not
-     * @throws NullPointerException     if handler is null
-     * @throws IllegalArgumentException if index + 1 is lesser than the node level (it means that the match has been
-     *                                  found in a substring that is shorter than the match itself which obviously
-     *                                  cannot happen without programming errors)
-     */
-    protected boolean handleMatch(@Nonnull Node<T> node, int index, @Nonnull MatchHandler<T> handler) {
-        int endOfWordExclusive = index + 1;
-        Validate.isTrue(endOfWordExclusive >= node.getLevel());
-        Validate.notNull(handler);
-        Node<T> current = node;
-        while (current != null) {
-            if (current.isTerminal()) {
-                if (!handler.handle(endOfWordExclusive - current.getLevel(), endOfWordExclusive,
-                        current.getPayload())) {
-                    return false;
-                }
-            }
-            current = current.getTerminalSuffix();
-        }
-        return true;
     }
 
     /**

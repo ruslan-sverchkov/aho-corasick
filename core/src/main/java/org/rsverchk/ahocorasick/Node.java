@@ -169,6 +169,38 @@ public class Node<T> {
         children.forEachEntry(procedure);
     }
 
+    /**
+     * A position corresponding to the current node has been found in an input string, traverse the trie starting from
+     * the current node and call the specified handler for each terminal node that will be encountered.
+     *
+     * Implementation comment:
+     * recursive implementation is good looking but this one is stack overflow free
+     *
+     * @param index   a position in an input string corresponding to the current node
+     * @param handler a match handler
+     * @return whether to continue matching or not
+     * @throws NullPointerException     if handler is null
+     * @throws IllegalArgumentException if index + 1 is lesser than the node level (it means that the match has been
+     *                                  found in a substring that is shorter than the match itself which obviously
+     *                                  cannot happen without programming errors)
+     */
+    public boolean handleMatch(int index, @Nonnull MatchHandler<T> handler) {
+        int endOfWordExclusive = index + 1;
+        Validate.isTrue(endOfWordExclusive >= level);
+        Validate.notNull(handler);
+        Node<T> current = this;
+        while (current != null) {
+            if (current.isTerminal()) {
+                if (!handler.handle(endOfWordExclusive - current.getLevel(), endOfWordExclusive,
+                        current.getPayload())) {
+                    return false;
+                }
+            }
+            current = current.getTerminalSuffix();
+        }
+        return true;
+    }
+
     @Override
     public String toString() {
         TCharList list = new TCharArrayList(1);
