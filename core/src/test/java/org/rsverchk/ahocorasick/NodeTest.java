@@ -35,6 +35,12 @@ public class NodeTest {
     @Mock
     private Node<Object> node;
 
+    @Mock
+    private Node<Object> suffix;
+
+    @Mock
+    private Node<Object> terminalSuffix;
+
     private Node<Object> root;
 
     @Before
@@ -281,31 +287,50 @@ public class NodeTest {
     }
 
     // test initNode() -------------------------------------------------------------------------------------------------
-//    @Test
-//    public void testInitNode_NoTerminalSuffix() {
-//        doReturn(suffix).when(trie).findSuffix('$', node);
-//        doReturn(null).when(trie).findTerminalSuffix(node);
-//
-//        trie.initNode('$', node);
-//
-//        verify(node, times(1)).setSuffix(suffix);
-//        verify(node, times(1)).compact();
-//        verifyNoMoreInteractions(node);
-//    }
-//
-//    @Test
-//    public void testInitNode() {
-//        doReturn(suffix).when(trie).findSuffix('$', node);
-//        doReturn(terminalSuffix).when(trie).findTerminalSuffix(node);
-//
-//        trie.initNode('$', node);
-//
-//        InOrder inOrder = inOrder(node);
-//        inOrder.verify(node, times(1)).setSuffix(suffix);
-//        inOrder.verify(node, times(1)).setTerminalSuffix(terminalSuffix);
-//        inOrder.verify(node, times(1)).compact();
-//        verifyNoMoreInteractions(node);
-//    }
+    @Test
+    public void testInitNode_NoTerminalSuffix() {
+        Node<Object> a = root.createChild('a');
+        Node<Object> ab = a.createChild('b');
+        Node<Object> abc = ab.createChild('c');
+        Node<Object> c = root.createChild('c');
+
+        root.setSuffix(root);
+        a.setSuffix(root);
+        c.setSuffix(root);
+        ab.setSuffix(root);
+
+        abc.setChildren(children);
+
+        abc.init();
+
+        assertThat(abc.getSuffix(), sameInstance(c));
+        assertThat(abc.getTerminalSuffix(), nullValue());
+        verify(children, times(1)).compact();
+        verifyNoMoreInteractions(children);
+    }
+
+    @Test
+    public void testInitNode() {
+        Node<Object> a = root.createChild('a');
+        Node<Object> ab = a.createChild('b');
+        Node<Object> abc = ab.createChild('c');
+        Node<Object> c = root.createChild('c');
+
+        root.setSuffix(root);
+        a.setSuffix(root);
+        c.setSuffix(root);
+        c.setPayload("c");
+        ab.setSuffix(root);
+
+        abc.setChildren(children);
+
+        abc.init();
+
+        assertThat(abc.getSuffix(), sameInstance(c));
+        assertThat(abc.getTerminalSuffix(), sameInstance(c));
+        verify(children, times(1)).compact();
+        verifyNoMoreInteractions(children);
+    }
     // test initNode() -------------------------------------------------------------------------------------------------
 
     // test getKey() ---------------------------------------------------------------------------------------------------

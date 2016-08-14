@@ -181,55 +181,41 @@ public class MutableTrieTest {
         trie.match("text", handler);
     }
 
-//    @Test
-//    public void testMatch_Interrupt() {
-//        doReturn('a').when(converter).convert('a');
-//        doReturn('b').when(converter).convert('b');
-//        doReturn('c').when(converter).convert('c');
-//        doReturn('$').when(converter).convert('$');
-//
-//        trie.setBuilt(true);
-//
-//        doReturn(true).when(trie).handleMatch(a, 0, handler);
-//        doReturn(true).when(trie).handleMatch(ab, 1, handler);
-//        doReturn(true).when(trie).handleMatch(abc, 2, handler);
-//        doReturn(false).when(trie).handleMatch(b, 4, handler);
-//        doReturn(true).when(trie).handleMatch(c, 5, handler);
-//
-//        trie.match("abc$bc", handler);
-//
-//        InOrder inOrder = inOrder(trie);
-//        inOrder.verify(trie, times(1)).handleMatch(a, 0, handler);
-//        inOrder.verify(trie, times(1)).handleMatch(ab, 1, handler);
-//        inOrder.verify(trie, times(1)).handleMatch(abc, 2, handler);
-//        inOrder.verify(trie, times(1)).handleMatch(b, 4, handler);
-//        inOrder.verify(trie, never()).handleMatch(c, 5, handler);
-//    }
-//
-//    @Test
-//    public void testMatch() {
-//        doReturn('a').when(converter).convert('a');
-//        doReturn('b').when(converter).convert('b');
-//        doReturn('c').when(converter).convert('c');
-//        doReturn('$').when(converter).convert('$');
-//
-//        trie.setBuilt(true);
-//
-//        doReturn(true).when(trie).handleMatch(a, 0, handler);
-//        doReturn(true).when(trie).handleMatch(ab, 1, handler);
-//        doReturn(true).when(trie).handleMatch(abc, 2, handler);
-//        doReturn(true).when(trie).handleMatch(b, 4, handler);
-//        doReturn(true).when(trie).handleMatch(c, 5, handler);
-//
-//        trie.match("abc$bc", handler);
-//
-//        InOrder inOrder = inOrder(trie);
-//        inOrder.verify(trie, times(1)).handleMatch(a, 0, handler);
-//        inOrder.verify(trie, times(1)).handleMatch(ab, 1, handler);
-//        inOrder.verify(trie, times(1)).handleMatch(abc, 2, handler);
-//        inOrder.verify(trie, times(1)).handleMatch(b, 4, handler);
-//        inOrder.verify(trie, times(1)).handleMatch(c, 5, handler);
-//    }
+    @Test
+    public void testMatch_Interrupt() {
+        doReturn('a').when(converter).convert('a');
+        doReturn('b').when(converter).convert('b');
+        doReturn('c').when(converter).convert('c');
+        doReturn('$').when(converter).convert('$');
+
+        trie.setBuilt(true);
+
+        doReturn(false).when(handler).handle(0, 3, "abc");
+        doReturn(true).when(handler).handle(2, 3, "c");
+
+        trie.match("abc$bc", handler);
+
+        verify(handler, times(1)).handle(0, 3, "abc");
+        verify(handler, never()).handle(2, 3, "c");
+    }
+
+    @Test
+    public void testMatch() {
+        doReturn('a').when(converter).convert('a');
+        doReturn('b').when(converter).convert('b');
+        doReturn('c').when(converter).convert('c');
+        doReturn('$').when(converter).convert('$');
+
+        trie.setBuilt(true);
+
+        doReturn(true).when(handler).handle(0, 3, "abc");
+        doReturn(true).when(handler).handle(2, 3, "c");
+
+        trie.match("abc$bc", handler);
+
+        verify(handler, times(1)).handle(0, 3, "abc");
+        verify(handler, times(1)).handle(2, 3, "c");
+    }
     // test match() ----------------------------------------------------------------------------------------------------
 
     // test breadthFirstTraversal() ------------------------------------------------------------------------------------
